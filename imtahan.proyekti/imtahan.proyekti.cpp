@@ -9,7 +9,7 @@ const int BOARD_SIZE = 10;
 const int SHIP_SIZES[] = { 4, 3, 3, 2, 2, 2, 1, 1, 1, 1 };
 const int SHIP_COUNT = sizeof(SHIP_SIZES) / sizeof(SHIP_SIZES[0]);
 
-void initializeBoard(char board[BOARD_SIZE][BOARD_SIZE]) {
+void initializeBoard(char** board) {
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
             board[i][j] = '+';
@@ -17,7 +17,7 @@ void initializeBoard(char board[BOARD_SIZE][BOARD_SIZE]) {
     }
 }
 
-bool canPlaceShip(char board[BOARD_SIZE][BOARD_SIZE], int x, int y, int size, bool vertical) {
+bool canPlaceShip(char** board, int x, int y, int size, bool vertical) {
     if (vertical) {
         if (x + size > BOARD_SIZE) return false;
         for (int i = 0; i < size; ++i) {
@@ -33,7 +33,7 @@ bool canPlaceShip(char board[BOARD_SIZE][BOARD_SIZE], int x, int y, int size, bo
     return true;
 }
 
-void placeShip(char board[BOARD_SIZE][BOARD_SIZE], int x, int y, int size, bool vertical) {
+void placeShip(char** board, int x, int y, int size, bool vertical) {
     if (vertical) {
         for (int i = 0; i < size; ++i) {
             board[x + i][y] = 'S';
@@ -46,7 +46,7 @@ void placeShip(char board[BOARD_SIZE][BOARD_SIZE], int x, int y, int size, bool 
     }
 }
 
-void printBoard(char board[BOARD_SIZE][BOARD_SIZE], int cursorX = -1, int cursorY = -1, bool showShips = false) {
+void printBoard(char** board, int cursorX = -1, int cursorY = -1, bool showShips = false) {
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
             if (i == cursorX && j == cursorY) {
@@ -69,7 +69,7 @@ void printBoard(char board[BOARD_SIZE][BOARD_SIZE], int cursorX = -1, int cursor
     }
 }
 
-void placeShipsManual(char board[BOARD_SIZE][BOARD_SIZE]) {
+void placeShipsManual(char** board) {
     int x = 0, y = 0;
     char input;
     int shipIndex = 0;
@@ -85,19 +85,19 @@ void placeShipsManual(char board[BOARD_SIZE][BOARD_SIZE]) {
         input = _getch();
 
         switch (input) {
-        case 72:
+        case 72: 
             x = (x - 1 + BOARD_SIZE) % BOARD_SIZE;
             break;
         case 80:
             x = (x + 1) % BOARD_SIZE;
             break;
-        case 75:
+        case 75: 
             y = (y - 1 + BOARD_SIZE) % BOARD_SIZE;
             break;
         case 77:
             y = (y + 1) % BOARD_SIZE;
             break;
-        case 13:
+        case 13: 
             if (canPlaceShip(board, x, y, size, vertical)) {
                 placeShip(board, x, y, size, vertical);
                 shipIndex++;
@@ -114,7 +114,7 @@ void placeShipsManual(char board[BOARD_SIZE][BOARD_SIZE]) {
     }
 }
 
-bool takeShot(char board[BOARD_SIZE][BOARD_SIZE], int x, int y) {
+bool takeShot(char** board, int x, int y) {
     if (board[x][y] == 'S') {
         board[x][y] = 'A';
         return true;
@@ -129,7 +129,7 @@ bool takeShot(char board[BOARD_SIZE][BOARD_SIZE], int x, int y) {
     }
 }
 
-bool allShipsSunk(char board[BOARD_SIZE][BOARD_SIZE]) {
+bool allShipsSunk(char** board) {
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
             if (board[i][j] == 'S') {
@@ -140,7 +140,7 @@ bool allShipsSunk(char board[BOARD_SIZE][BOARD_SIZE]) {
     return true;
 }
 
-void selectCoordinate(char board[BOARD_SIZE][BOARD_SIZE], int& x, int& y) {
+void selectCoordinate(char** board, int& x, int& y) {
     int cursorX = 0, cursorY = 0;
     char input;
 
@@ -172,8 +172,8 @@ void selectCoordinate(char board[BOARD_SIZE][BOARD_SIZE], int& x, int& y) {
     }
 }
 
-void placeShipsRandom(char board[BOARD_SIZE][BOARD_SIZE]) {
-    srand((time(0)));
+void placeShipsRandom(char** board) {
+    srand(static_cast<unsigned int>(time(0)));
     for (int shipIndex = 0; shipIndex < SHIP_COUNT; ++shipIndex) {
         int size = SHIP_SIZES[shipIndex];
         bool placed = false;
@@ -223,7 +223,7 @@ void displayWelcomeMenu() {
     }
 }
 
-void chooseShipPlacement(char board[BOARD_SIZE][BOARD_SIZE]) {
+void chooseShipPlacement(char** board) {
     int selectedOption = 0;
     char input;
     string options[2] = { "\033[31mManual", "\033[32mRandom" };
@@ -263,10 +263,13 @@ void displayTurnMessage(bool player2Turn) {
     _getch();
 }
 
-
 int main() {
-    char board1[BOARD_SIZE][BOARD_SIZE];
-    char board2[BOARD_SIZE][BOARD_SIZE];
+    char** board1 = new char* [BOARD_SIZE];
+    char** board2 = new char* [BOARD_SIZE];
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        board1[i] = new char[BOARD_SIZE];
+        board2[i] = new char[BOARD_SIZE];
+    }
 
     displayWelcomeMenu();
 
@@ -308,5 +311,13 @@ int main() {
     }
 
     cout << "Oyun Bitti!" << endl;
+
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        delete[] board1[i];
+        delete[] board2[i];
+    }
+    delete[] board1;
+    delete[] board2;
+
     return 0;
 }
